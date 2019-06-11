@@ -1,16 +1,15 @@
-FROM python:2.7
-MAINTAINER binux <roy@binux.me>
+FROM python:3.6.5
 
 # install phantomjs
-RUN mkdir -p /opt/phantomjs \
-        && cd /opt/phantomjs \
-        && wget -O phantomjs.tar.bz2 https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2 \
-        && tar xavf phantomjs.tar.bz2 --strip-components 1 \
-        && ln -s /opt/phantomjs/bin/phantomjs /usr/local/bin/phantomjs \
-        && rm phantomjs.tar.bz2
+# RUN mkdir -p /opt/phantomjs \
+#         && cd /opt/phantomjs \
+#         && wget -O phantomjs.tar.bz2 https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2 \
+#         && tar xavf phantomjs.tar.bz2 --strip-components 1 \
+#         && ln -s /opt/phantomjs/bin/phantomjs /usr/local/bin/phantomjs \
+#         && rm phantomjs.tar.bz2
 
 # install nodejs
-ENV NODEJS_VERSION=8.15.0 \
+ENV NODEJS_VERSION=10.16.0 \
     PATH=$PATH:/opt/node/bin
 
 WORKDIR "/opt/node"
@@ -29,9 +28,11 @@ ADD ./ /opt/pyspider
 
 # run test
 WORKDIR /opt/pyspider
-RUN pip install -e .[all]
 
-RUN npm i puppeteer express
+RUN npm install -g cnpm --registry=https://registry.npm.taobao.org
+RUN pip install -e .[all]
+RUN export PUPPETEER_DOWNLOAD_HOST=https://storage.googleapis.com.cnpmjs.org
+RUN cnpm i puppeteer express
 
 VOLUME ["/opt/pyspider"]
 ENTRYPOINT ["pyspider"]
