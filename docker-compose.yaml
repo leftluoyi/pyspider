@@ -1,0 +1,71 @@
+version: '2'
+services:
+    puppeteer:
+        image: 'leftluoyi/pyspider:latest'
+        command: puppeteer
+        cpu_shares: 256
+        environment:
+            - 'EXCLUDE_PORTS=5000,23333,24444'
+        expose:
+            - '22222' 
+        mem_limit: 256m
+        restart: always
+
+    puppeteer-lb:
+        image: 'dockercloud/haproxy:latest'
+        links:
+            - puppeteer
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock 
+        restart: always
+
+    fetcher:
+        image: 'leftluoyi/pyspider:latest'
+        command: '--message-queue "redis://172.27.16.14:6379/0" --puppeteer-proxy "puppeteer:80" fetcher --xmlrpc'
+        cpu_shares: 256
+        environment:
+            - 'EXCLUDE_PORTS=5000,22222,23333'
+        links:
+            - 'puppeteer-lb:puppeteer'
+        mem_limit: 256m
+        restart: always
+    
+    fetcher-lb:
+        image: 'dockercloud/haproxy:latest'
+        links:
+            - fetcher
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock 
+        restart: always
+
+    processor:
+        image: 'leftluoyi/pyspider:latest'
+        command: '--projectdb "sqlalchemy+postgresql+projectdb://postgres:Zaq1Xsw2@172.27.16.14:5432/projectdb" --message-queue "redis://172.27.16.14:6379/0" processor'
+        cpu_shares: 256
+        mem_limit: 256m
+        restart: always
+
+    result-worker:
+        image: 'leftluoyi/pyspider:latest'
+        command: '--taskdb "sqlalchemy+postgresql+taskdb://postgres:Zaq1Xsw2@172.27.16.14:5432/taskdb" --projectdb "sqlalchemy+postgresql+projectdb://postgres:Zaq1Xsw2@172.27.16.14:5432/projectdb" --resultdb "sqlalchemy+postgresql+resultdb://postgres:Zaq1Xsw2@172.27.16.14:5432/resultdb" --message-queue "redis://172.27.16.14:6379/0" result-worker'
+        cpu_shares: 256
+        mem_limit: 256m
+        restart: always
+
+    webui:
+        image: 'leftluoyi/pyspider:latest'
+        command: '--taskdb "sqlalchemy+postgresql+taskdb://postgres:Zaq1Xsw2@172.27.16.14:5432/taskdb" --projectdb "sqlalchemy+postgresql+projectdb://postgres:Zaq1Xsw2@172.27.16.14:5432/projectdb" --resultdb "sqlalchemy+postgresql+resultdb://postgres:Zaq1Xsw2@172.27.16.14:5432/resultdb" --message-queue "redis://172.27.16.14:6379/0" webui --max-rate 0.3 --max-burst 3 --scheduler-rpc "http://172.27.16.14:23333/" --fetcher-rpc "http://fetcher/" --username "leftluoyi" --password "pd" --need-auth'
+        cpu_shares: 256
+        environment:
+            - 'EXCLUDE_PORTS=24444,22222,23333'
+        ports:
+            - '5000:5000' 
+        links:
+            - 'fetcher-lb:fetcher' 
+        mem_limit: 256m
+        restart: always
+
+networks:
+    default:
+        external:
+            name: pyspider
