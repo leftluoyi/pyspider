@@ -84,8 +84,8 @@ class QuitableFlask(Flask):
         self.logger.info('webui exiting...')
 
 app = QuitableFlask('webui',
-                    static_folder=os.path.join('static'),
-                    template_folder=os.path.join('templates'))
+                    static_folder=os.path.join(os.path.dirname(__file__), 'static'),
+                    template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
 app.secret_key = os.urandom(24)
 app.jinja_env.line_statement_prefix = '#'
 app.jinja_env.globals.update(builtins.__dict__)
