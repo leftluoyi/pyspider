@@ -16,6 +16,7 @@ import logging
 import logging.config
 
 import click
+sys.path.append("..")
 import pyspider
 from pyspider.message_queue import connect_message_queue
 from pyspider.database import connect_database
