@@ -1,12 +1,12 @@
 FROM python:3.6.5
 
 # install phantomjs
-# RUN mkdir -p /opt/phantomjs \
-#         && cd /opt/phantomjs \
-#         && wget -O phantomjs.tar.bz2 https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2 \
-#         && tar xavf phantomjs.tar.bz2 --strip-components 1 \
-#         && ln -s /opt/phantomjs/bin/phantomjs /usr/local/bin/phantomjs \
-#         && rm phantomjs.tar.bz2
+RUN mkdir -p /opt/phantomjs \
+        && cd /opt/phantomjs \
+        && wget -O phantomjs.tar.bz2 https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2 \
+        && tar xavf phantomjs.tar.bz2 --strip-components 1 \
+        && ln -s /opt/phantomjs/bin/phantomjs /usr/local/bin/phantomjs \
+        && rm phantomjs.tar.bz2
 
 # install nodejs
 ENV NODEJS_VERSION=10.16.0 \
