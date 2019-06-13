@@ -3,7 +3,7 @@ services:
     puppeteer:
         image: 'leftluoyi/pyspider:latest'
         command: puppeteer
-        cpu_shares: 256
+        cpu_shares: 512
         environment:
             - 'EXCLUDE_PORTS=5000,23333,24444'
         expose:
